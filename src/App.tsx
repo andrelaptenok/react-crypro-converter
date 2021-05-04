@@ -1,5 +1,6 @@
 import React from 'react';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
+import axios from 'axios';
 import Container from '@material-ui/core/Container';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -9,6 +10,12 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Typography from '@material-ui/core/Typography';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -18,7 +25,7 @@ const useStyles = makeStyles((theme: Theme) =>
     paper: {
       padding: theme.spacing(2),
       color: theme.palette.text.secondary,
-      textAlign: 'center'
+      textAlign: 'center',
     },
     cryptoBox: {
       display: 'flex',
@@ -34,16 +41,79 @@ const useStyles = makeStyles((theme: Theme) =>
     currencyType: {
       minWidth: '30%',
     },
+    table: {
+      minWidth: 650,
+    },
+    currencyIcon: {
+      Width: 18,
+      Height: 18,
+      BorderRadius: 30,
+    }
   }),
 );
 
+type TCoin = {
+  name: String;
+  fullName: String;
+  imageUrl: String;
+  price: number;
+  volume24Hour: number;
+};
+
 function App() {
   const classes = useStyles();
+
+  const [allCoins, setAllCoins] = React.useState<TCoin[]>([]);
+
+  React.useEffect(() => {
+    axios
+      .get('https://min-api.cryptocompare.com/data/top/totalvolfull?limit=10&tsym=USD')
+      .then(({ data }) => {
+        const coins: TCoin[] = data.Data.map((coin: any) => {
+          const obj: TCoin = {
+            name: coin.coinInfo.Name,
+            fullName: coin.coinInfo.FullName,
+            imageUrl: `https://www.cryptocompare.com/${coin.CoinInfo.ImageUrl}`,
+            price: coin.DISPLAY.PRICE.toFixed(3),
+            volume24Hour: parseInt(coin.RAW.USD.VOLUME24HOUR),
+          };
+          return obj;
+        });
+        setAllCoins(coins);
+      });
+  }, []);
+
+  console.log(allCoins);
   return (
     <Container className={classes.root} maxWidth="lg">
       <Grid container spacing={3}>
         <Grid item xs={8}>
-          <Paper className={classes.paper}>xs=12</Paper>
+          <TableContainer component={Paper}>
+            <Table className={classes.table} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell></TableCell>
+                  <TableCell align="left">Name</TableCell>
+                  <TableCell align="left">FullName</TableCell>
+                  <TableCell align="left">Price</TableCell>
+                  <TableCell align="left">Volume24hour</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {allCoins.map((coin) => (
+                  <TableRow>
+                    <TableCell component="th" scope="row">
+                      <img class={classes.currencyIcon} src={coin.imageUrl} alt="Coin icon" />
+                    </TableCell>
+                    <TableCell align="left">{coin.name}</TableCell>
+                    <TableCell align="left">{coin.fullName}</TableCell>
+                    <TableCell align="left">${coin.price}</TableCell>
+                    <TableCell align="left">${coin.volume24Hour}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Grid>
         <Grid item xs={4}>
           <Paper className={classes.paper}>
