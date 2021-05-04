@@ -45,9 +45,9 @@ const useStyles = makeStyles((theme: Theme) =>
       minWidth: 650,
     },
     currencyIcon: {
-      Width: 18,
-      Height: 18,
-      BorderRadius: 30,
+      width: 18,
+      height: 18,
+      borderRadius: 30,
     }
   }),
 );
@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme: Theme) =>
 type TCoin = {
   name: String;
   fullName: String;
-  imageUrl: String;
+  imageUrl: any;
   price: number;
   volume24Hour: number;
 };
@@ -71,10 +71,10 @@ function App() {
       .then(({ data }) => {
         const coins: TCoin[] = data.Data.map((coin: any) => {
           const obj: TCoin = {
-            name: coin.coinInfo.Name,
-            fullName: coin.coinInfo.FullName,
+            name: coin.CoinInfo.Name,
+            fullName: coin.CoinInfo.FullName,
             imageUrl: `https://www.cryptocompare.com/${coin.CoinInfo.ImageUrl}`,
-            price: coin.DISPLAY.PRICE.toFixed(3),
+            price: coin.RAW.USD.PRICE.toFixed(3),
             volume24Hour: parseInt(coin.RAW.USD.VOLUME24HOUR),
           };
           return obj;
@@ -100,10 +100,10 @@ function App() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {allCoins.map((coin) => (
+                {allCoins.map((coin: TCoin) => (
                   <TableRow>
                     <TableCell component="th" scope="row">
-                      <img class={classes.currencyIcon} src={coin.imageUrl} alt="Coin icon" />
+                      <img className={classes.currencyIcon} src={coin.imageUrl} alt="Coin icon" />
                     </TableCell>
                     <TableCell align="left">{coin.name}</TableCell>
                     <TableCell align="left">{coin.fullName}</TableCell>
